@@ -75,25 +75,26 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get install -y apache2
 
-    # Add repository to apt-source 
-    sudo apt install apt-transport-https ca-certificates curl gnupg software-properties-common 
+    #docker installation librairies 
+    sudo apt-get install ca-certificates curl
     sudo install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository \ "deb [arch=amd64] https://download.docker.com/linux/ubuntu \ $(lsb_release -cs) \ stable"
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
 
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \ sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-    sudo apt-get update
-    # # add docker packages 
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-    # # check if docker installation wass success 
-    sudo systemctl status docker
+    
+    sudo apt-get update 
+    VERSION_STRING=5:25.0.5-1~ubuntu.22.04~jammy 
+    sudo apt-get install docker-ce=$VERSION_STRING docker-ce-cli=$VERSION_STRING containerd.io docker-buildx-plugin docker-compose-plugin
 
     # # create a docker group on my VM
     sudo groupadd docker
 
     # # add the current use to that group 
-    sudo usermod -aG docker ${USER}
+    sudo usermod -aG docker vagrant
 
     # # activate changes 
     newgrp docker
