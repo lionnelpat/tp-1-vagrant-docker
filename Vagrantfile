@@ -24,7 +24,10 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
+  config.vm.network "forwarded_port", guest: 8888, host: 8888
   config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 5432, host: 5432
+  config.vm.network "forwarded_port", guest: 9000, host: 9000
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -51,7 +54,7 @@ Vagrant.configure("2") do |config|
   # by making sure your Vagrantfile isn't accessible to the vagrant box.
   # If you use this you may want to enable additional shared subfolders as
   # shown above.
-  # config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "./app", "/var/www/html", disabled: false
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -74,6 +77,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y apache2
+
+    sudo apt install php php-pgsql libapache2-mod-php
 
     #docker installation librairies 
     sudo apt-get install ca-certificates curl
@@ -99,7 +104,7 @@ Vagrant.configure("2") do |config|
     # # activate changes 
     newgrp docker
 
-    # # test if everything goes well 
-    docker run hello-world
+    docker compose up -d
+
   SHELL
 end
